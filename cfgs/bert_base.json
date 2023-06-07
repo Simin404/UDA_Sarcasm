@@ -1,0 +1,8 @@
+{
+	"max_len": 30,
+    "batch_size": 40,
+    "lr" : 1e-5,
+    "n_epochs": 5,
+    "results_dir":"/content/drive/MyDrive/UDA_Sarcasm/results/bert_base",
+    "print_after_steps": 500
+}
