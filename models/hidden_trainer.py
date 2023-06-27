@@ -23,7 +23,7 @@ class Hidden_Trainer_One(object):
         self.source_dl = DataLoader(dataset = source, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
         self.source_val_dl = DataLoader(dataset = source_val, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
         self.target_dl = DataLoader(dataset = target, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
-        self.target_val_dl = DataLoader(dataset = target_val, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
+        self.target_val_dl = DataLoader(dataset = target_val, batch_size = cfg['batch_size'], shuffle = True)
         self.criterion = nn.CrossEntropyLoss()
 
     def train_classifier(self):
@@ -214,17 +214,21 @@ class Hidden_Trainer_One(object):
     
     def predict(self):
         """Evaluation for target encoder by source classifier on target dataset."""
+        y_pred = np.array([])
+        y_true = np.array([])
         self.tgt_encoder.eval()
         self.src_classifier.eval()
-
         target_iterator = iter(self.target_val_dl)
         data_len = len(self.target_val_dl)
         for batch in range(data_len):
             with torch.no_grad():
                 eval, labels = next(target_iterator)
                 encode_pred = self.tgt_encoder(eval.to(self.device))
-                y_pred = self.src_classifier(encode_pred)
-        return y_pred.max(dim = 1)[1], labels
+                pred = self.src_classifier(encode_pred)
+                pred = pred.max(dim = 1)[1]
+                y_pred = np.append(y_pred, pred.cpu().numpy())
+                y_true = np.append(y_true, labels.cpu().numpy())
+        return y_pred, y_true
 
     def save_classifier(self, epoch):
         """ save model """
@@ -826,7 +830,7 @@ class Hidden_Trainer_repeat(object):
         self.source_dl = DataLoader(dataset = source, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
         self.source_val_dl = DataLoader(dataset = source_val, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
         self.target_dl = DataLoader(dataset = target, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
-        self.target_val_dl = DataLoader(dataset = target_val, batch_size = cfg['batch_size'], shuffle = True, drop_last=True)
+        self.target_val_dl = DataLoader(dataset = target_val, batch_size = cfg['batch_size'], shuffle = True)
         self.criterion = nn.CrossEntropyLoss()
 
     def train_classifier(self):
